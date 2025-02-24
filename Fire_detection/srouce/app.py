@@ -4,19 +4,24 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import mysql.connector
 import time
+import requests
 import torch
 from flask import Flask, render_template, Response, jsonify
 from datetime import datetime
 from ultralytics import YOLO
 from PIL import Image
-
+from io import BytesIO
 #  Khởi tạo Flask Web Server
 app = Flask(__name__)
 
 # 🔧 Cấu hình MQTT
-MQTT_BROKER = "192.168.1.74"
+MQTT_BROKER = "192.168.1.41"
 MQTT_PORT = 1883
 MQTT_TOPIC = "img"
+
+# Cấu hình telegram
+TELEGRAM_TOKEN = "7750866421:AAGCAGA7m-hrWY3kehasDoboy51NEtb0EQo"
+TELEGRAM_CHAT_ID = "-4764219942"
 
 #  Kết nối MySQL
 db = mysql.connector.connect(
@@ -28,7 +33,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 #  Load mô hình YOLOv8 nhận diện đám cháy
-model = YOLO('D:/Du_lieu_tong_hop/K57KMT/IOT/Nhan_dang_dam_chay/Nhan_dang_dam_chay/nhan_dang/model/best.pt')
+model = YOLO('/nhan_dang/model/best.pt')
 model.eval()
 
 #  Biến toàn cục lưu ảnh từ MQTT
@@ -62,6 +67,9 @@ def detect_fire(image):
     # 🖼 Chuyển ảnh về định dạng OpenCV để hiển thị trên web
     _, buffer = cv2.imencode('.jpg', image_cv)
     latest_image = buffer.tobytes()  #  Cập nhật biến `latest_image`
+    if fire_detected:
+        image_stream = BytesIO(latest_image)  # 🔥 Lưu ảnh vào RAM
+        send_telegram_message("🔥 Cảnh báo! Phát hiện đám cháy!", image_stream)
 
     return fire_detected
 
@@ -140,6 +148,33 @@ def on_message(client, userdata, msg):
 
         except Exception as e:
             print(f" Lỗi khi xử lý phần ảnh: {e}")
+import requests
+
+def send_telegram_message(message, image_bytes=None):
+    """Gửi thông báo và hình ảnh qua Telegram trực tiếp từ bộ nhớ"""
+    try:
+        # Gửi tin nhắn
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message
+        }
+        requests.post(url, json=payload)
+
+        # Gửi ảnh trực tiếp từ bộ nhớ
+        if image_bytes:
+            url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
+            files = {'photo': ('fire_detected.jpg', image_bytes)}
+            payload = {
+                "chat_id": TELEGRAM_CHAT_ID,
+                "caption": message
+            }
+            requests.post(url, files=files, data=payload)
+
+        print("📤 Đã gửi thông báo qua Telegram!")
+
+    except Exception as e:
+        print(f"❌ Lỗi khi gửi thông báo Telegram: {e}")
 
 
 #  Kết nối MQTT
