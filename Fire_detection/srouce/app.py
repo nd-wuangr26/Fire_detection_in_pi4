@@ -25,9 +25,9 @@ TELEGRAM_CHAT_ID = "-4764219942"
 
 #  Kết nối MySQL
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",  #  Thay bằng user MySQL của bạn
-    password="123",  #  Thay bằng mật khẩu MySQL
+    host="quanlybaido.duckdns.org",
+    user="admin",  #  Thay bằng user MySQL của bạn
+    password="admin",  #  Thay bằng mật khẩu MySQL
     database="fire_detection"
 )
 cursor = db.cursor()
@@ -79,9 +79,9 @@ def save_fire_detection():
     try:
         # 📌 Tạo kết nối MySQL mới mỗi lần truy vấn
         db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="123",
+            host="quanlybaido.duckdns.org",
+            user="admin",
+            password="admin",
             database="fire_detection"
         )
 
@@ -192,9 +192,9 @@ def index():
     try:
         # 📌 Tạo kết nối MySQL mới mỗi lần truy vấn
         db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="123",
+            host="quanlybaido.duckdns.org",
+            user="admin",
+            password="admin",
             database="fire_detection"
         )
 
@@ -233,9 +233,9 @@ def get_fire_detection():
     try:
         # 📌 Tạo kết nối MySQL mới mỗi lần truy vấn
         db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="123",
+            host="quanlybaido.duckdns.org",
+            user="admin",
+            password="admin",
             database="fire_detection"
         )
 
@@ -255,9 +255,9 @@ def get_chart_data():
     """API trả về dữ liệu thống kê theo từng giờ cho tất cả các ngày"""
     try:
         db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="123",
+            host="quanlybaido.duckdns.org",
+            user="admin",
+            password="admin",
             database="fire_detection"
         )
 
